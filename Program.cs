@@ -1,9 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-// Vec3
-using System.Numerics;
-
-static void WriteTestImage() {
+﻿static void WriteTestImage() {
 
     const int width = 256;
     const int height = 256;
