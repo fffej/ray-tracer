@@ -11,7 +11,15 @@ static class PPM {
         int height = pixels[0].Length;
 
         for (int j = height-1; j >= 0; --j)
-            for (int i = 0; i < width; ++i)
-                writer.WriteLine($"{pixels[i][j][0]} {pixels[i][j][1]} {pixels[i][j][2]}");
+            for (int i = 0; i < width; ++i) {
+
+                var p = pixels[i][j];
+
+                int ir = (int)(255.999 * p[0]);
+                int ig = (int)(255.999 * p[1]);
+                int ib = (int)(255.999 * p[2]);
+
+                writer.WriteLine($"{ir} {ig} {ib}");
+            }
     }
 }    
