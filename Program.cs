@@ -185,7 +185,59 @@ static void ColoredSphere() {
     PPM.WritePPM(pixels, "colored-sphere.ppm");
 }
 
+static void HittableWorld() {
+
+    static Vector3 RayColor(Ray r, Hittable world) {
+        HitRecord rec = new();
+        if (world.Hit(r,0, float.MaxValue, ref rec)) {
+            return 0.5f * (rec.Normal + new Vector3(1.0f, 1.0f, 1.0f));
+        }
+
+        var unitDirection = Vector3.Normalize(r.Direction);
+        var t = 0.5f * (unitDirection.Y + 1.0f);
+        return (1.0f - t) * new Vector3(1.0f, 1.0f, 1.0f) + t * new Vector3(0.5f, 0.7f, 1.0f);
+    }
+
+    // Create an image
+    var aspectRatio = 16.0f/9.0f;
+    var imageWidth = 400;
+    var imageHeight = (int)(imageWidth / aspectRatio);
+
+    // Create a world
+    var world = new HittableComposite();
+    world.Add(new Sphere(new Vector3(0.0f, 0.0f, -1.0f), 0.5f));
+    world.Add(new Sphere(new Vector3(0.0f, -100.5f, -1.0f), 100.0f));
+
+    // Position the camera
+    var viewportHeight = 2.0f;
+    var viewportWidth = aspectRatio * viewportHeight;
+    var focalLength = 1.0f;
+
+    var origin = new Vector3(0f, 0, 0);
+    var horizontal = new Vector3(viewportWidth, 0, 0);
+    var vertical = new Vector3(0f, viewportHeight, 0);
+    var lowerLeftCorner = origin - horizontal/2 - vertical/2 - new Vector3(0, 0, focalLength);    
+
+    // Do the render
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
+
+    for (int j = imageHeight-1; j >= 0; --j) {
+        for (int i = 0; i < imageWidth; ++i) {
+            var u = (float)i / (imageWidth-1);
+            var v = (float)j / (imageHeight-1);
+            var r = new Ray(origin, lowerLeftCorner + u*horizontal + v*vertical - origin);
+
+            var rayColor = RayColor(r, world);
+
+            pixels[i][j] = ToArray(rayColor);
+        }
+    }    
+
+    PPM.WritePPM(pixels, "hittable-world.ppm");    
+}
+
 WriteTestImage();
 BlueToWhite();
 ASimpleRedSphere();
 ColoredSphere();
+HittableWorld();
