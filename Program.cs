@@ -5,13 +5,7 @@ static void WriteTestImage() {
     const int width = 256;
     const int height = 256;
 
-    var image = new float[width][][];
-    for (int i=0; i<width; i++) {
-        image[i] = new float[height][];
-        for (int j=0; j<height; j++) {
-            image[i][j] = new float[3];
-        }
-    }
+    var image = CreateBlankImage(width, height);
 
     for (int j = height-1; j >= 0; --j) {
         for (int i = 0; i < width; ++i) {
@@ -26,6 +20,17 @@ static void WriteTestImage() {
     }
 
     PPM.WritePPM(image, "out.ppm");
+}
+
+static float[][][] CreateBlankImage(int width, int height) {
+    var image = new float[width][][];
+    for (int i=0; i<width; i++) {
+        image[i] = new float[height][];
+        for (int j=0; j<height; j++) {
+            image[i][j] = new float[3];
+        }
+    }
+    return image;
 }
 
 static float[] ToArray(Vector3 v) {
@@ -53,13 +58,7 @@ static void BlueToWhite() {
     var vertical = new Vector3(0f,viewportHeight,0f);
     var lowerLeftCorner = origin - horizontal/2 - vertical/2 - new Vector3(0f,0f,focalLength);
 
-    var pixels = new float[imageWidth][][];
-    for (int i=0; i<imageWidth; i++) {
-        pixels[i] = new float[imageHeight][];
-        for (int j=0; j<imageHeight; j++) {
-            pixels[i][j] = new float[3];
-        }
-    }    
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
 
     for (int j = imageHeight-1; j >= 0; --j) {
         for (int i = 0; i < imageWidth; ++i) {
@@ -72,7 +71,6 @@ static void BlueToWhite() {
 
     PPM.WritePPM(pixels, "blue-to-white.ppm");
 }
-
 
 static void ASimpleRedSphere() {
 
@@ -108,20 +106,13 @@ static void ASimpleRedSphere() {
     var vertical = new Vector3(0f,viewportHeight,0f);
     var lowerLeftCorner = origin - horizontal/2.0f - vertical/2.0f - new Vector3(0f,0f,focalLength);
 
-    // TODO extract
-    var pixels = new float[imageWidth][][];
-    for (int i=0; i<imageWidth; i++) {
-        pixels[i] = new float[imageHeight][];
-        for (int j=0; j<imageHeight; j++) {
-            pixels[i][j] = new float[3];
-        }
-    }    
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
 
     for (int j = imageHeight-1; j >= 0; --j) {
         for (int i = 0; i < imageWidth; ++i) {
             var u = (float)i / (imageWidth-1);
             var v = (float)j / (imageHeight-1);
-            var r = new Ray(origin, lowerLeftCorner + u * horizontal + v * vertical - origin);
+            var r = new Ray(origin, lowerLeftCorner + u*horizontal + v*vertical - origin);
 
             var rayColor = RayColor(r);
 
