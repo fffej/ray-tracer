@@ -127,15 +127,17 @@ static void ColoredSphere() {
 
     static float HitSphere(Vector3 center, float radius, Ray r) {
         var oc = r.Origin - center;
-        var a = Vector3.Dot(r.Direction, r.Direction);
-        var b = 2.0f * Vector3.Dot(oc, r.Direction);
-        var c = Vector3.Dot(oc, oc) - radius * radius;
-        var discriminant = b * b - 4.0f * a * c;
+        
+        var a = r.Direction.LengthSquared();
+        var halfB = Vector3.Dot(oc, r.Direction);
+        var c = oc.LengthSquared() - radius * radius;
+        var discriminant = halfB * halfB - a * c;
 
         if (discriminant < 0) {
-            return -1.0f;
-        } else {
-            return (-b - (float)Math.Sqrt(discriminant)) / (2.0f * a);
+            return -1.0f;            
+        }
+        else {
+            return (-halfB - (float)Math.Sqrt(discriminant)) / a;
         }
     }
 
