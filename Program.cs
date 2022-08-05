@@ -123,6 +123,67 @@ static void ASimpleRedSphere() {
     PPM.WritePPM(pixels, "simple-red-sphere.ppm");
 }
 
+static void ColoredSphere() {
+
+    static float HitSphere(Vector3 center, float radius, Ray r) {
+        var oc = r.Origin - center;
+        var a = Vector3.Dot(r.Direction, r.Direction);
+        var b = 2.0f * Vector3.Dot(oc, r.Direction);
+        var c = Vector3.Dot(oc, oc) - radius * radius;
+        var discriminant = b * b - 4.0f * a * c;
+
+        if (discriminant < 0) {
+            return -1.0f;
+        } else {
+            return (-b - (float)Math.Sqrt(discriminant)) / (2.0f * a);
+        }
+    }
+
+    static Vector3 RayColor(Ray r) {
+        var t =  HitSphere(new Vector3(0.0f, 0.0f, -1.0f), 0.5f, r);
+        if (t > 0.0f) {
+            var n = Vector3.Normalize(r.At(t) - new Vector3(0.0f, 0.0f, -1.0f));
+
+            return 0.5f * new Vector3(n.X + 1.0f, n.Y + 1.0f, n.Z + 1.0f);
+        }
+
+        var unitDirection = Vector3.Normalize(r.Direction);
+        var s = 0.5f * (unitDirection.Y + 1.0f);
+
+        return (1.0f - s) * new Vector3(1.0f, 1.0f, 1.0f) + s * new Vector3(0.5f, 0.7f, 1.0f);
+    }
+
+    var aspectRatio = 16.0f/9.0f;
+    var imageWidth = 400;
+    var imageHeight = (int)(imageWidth / aspectRatio);
+
+    var viewportHeight = 2.0f;
+    var viewportWidth = aspectRatio * viewportHeight;
+    var focalLength = 1.0f;
+
+    var origin = new Vector3(0f,0f,0f);
+    var horizontal = new Vector3(viewportWidth,0f,0f);
+    var vertical = new Vector3(0f,viewportHeight,0f);
+    var lowerLeftCorner = origin - horizontal/2.0f - vertical/2.0f - new Vector3(0f,0f,focalLength);
+
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
+
+    for (int j = imageHeight-1; j >= 0; --j) {
+        for (int i = 0; i < imageWidth; ++i) {
+            var u = (float)i / (imageWidth-1);
+            var v = (float)j / (imageHeight-1);
+            var r = new Ray(origin, lowerLeftCorner + u*horizontal + v*vertical - origin);
+
+            var rayColor = RayColor(r);
+
+            pixels[i][j] = ToArray(rayColor);
+        }
+    }    
+
+    PPM.WritePPM(pixels, "colored-sphere.ppm");
+}
+
 WriteTestImage();
 BlueToWhite();
 ASimpleRedSphere();
+ColoredSphere();
