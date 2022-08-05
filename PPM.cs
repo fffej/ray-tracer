@@ -4,7 +4,7 @@ static class PPM {
     public static void WritePPM(float[][][] pixels, string filename) {
         using var writer = new StreamWriter(filename);
         writer.WriteLine("P3");
-        writer.WriteLine($"{pixels[0].Length} {pixels.Length}");
+        writer.WriteLine($"{pixels.Length} {pixels[0].Length}");
         writer.WriteLine("255");
 
         int width = pixels.Length;
