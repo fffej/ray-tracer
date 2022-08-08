@@ -286,6 +286,66 @@ static void HittableWorldWithAntiAliasing() {
     PPM.WritePPM(pixels, "hittable-world-aa.ppm", samplesPerPixel);    
 }
 
+static void DiffuseMaterials() {
+
+    static Vector3 RayColor(Ray r, Hittable world, int depth) {
+
+        if (depth <= 0) 
+            return new Vector3(0,0,0f);
+
+        HitRecord rec = new();
+        if (world.Hit(r,0, float.MaxValue, ref rec)) {
+            Vector3 target = rec.P + rec.Normal + Vector3Extensions.RandomUnitSphere();
+
+            var ray = new Ray(rec.P, target - rec.P);
+
+            return 0.5f * RayColor(ray, world, depth-1);
+        }
+
+        var unitDirection = Vector3.Normalize(r.Direction);
+        var t = 0.5f * (unitDirection.Y + 1.0f);
+        return (1.0f - t) * new Vector3(1.0f, 1.0f, 1.0f) + t * new Vector3(0.5f, 0.7f, 1.0f);
+    }
+
+    // Create an image
+    var aspectRatio = 16.0f/9.0f;
+    var imageWidth = 400;
+    var imageHeight = (int)(imageWidth / aspectRatio);
+    var samplesPerPixel = 100;
+    var maxDepth = 50;
+
+    // Create a world
+    var world = new HittableComposite();
+    world.Add(new Sphere(new Vector3(0.0f, 0.0f, -1.0f), 0.5f));
+    world.Add(new Sphere(new Vector3(0.0f, -100.5f, -1.0f), 100.0f));
+
+    // Position the camera
+    Camera camera = new ();
+    Random rnd = new ();
+
+    // Do the render
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
+
+    for (int j = imageHeight-1; j >= 0; --j) {
+        for (int i = 0; i < imageWidth; ++i) {
+
+            var pixelColor = new Vector3(0.0f, 0.0f, 0.0f);
+            for (int s=0;s<samplesPerPixel;++s) {
+                var u = (float)(i + rnd.NextSingle()) / (imageWidth-1);
+                var v = (float)(j  + rnd.NextSingle()) / (imageHeight-1);
+
+                var r = camera.GetRay(u, v);
+                pixelColor += RayColor(r, world, maxDepth);
+
+            }
+            pixels[i][j] = ToArray(pixelColor);
+        }
+    }    
+
+    PPM.WritePPM(pixels, "diffuse-materials.ppm", samplesPerPixel);    
+}
+
+
 
 WriteTestImage();
 BlueToWhite();
@@ -293,3 +353,4 @@ ASimpleRedSphere();
 ColoredSphere();
 HittableWorld();
 HittableWorldWithAntiAliasing();
+DiffuseMaterials();
