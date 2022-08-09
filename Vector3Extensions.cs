@@ -12,8 +12,13 @@ public static class Vector3Extensions {
     }
 
     public static Vector3 RandomUnitSphere() {
-        // TODO this is wrong
-        var p = Random();
-        return Vector3.Normalize(p);
+        while (true) {
+            var p = Vector3Extensions.Random(-1f, 1f);
+            if (p.LengthSquared() >= 1f) {
+                continue;
+            }
+
+            return p;
+        }
     }
 }

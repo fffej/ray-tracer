@@ -342,7 +342,8 @@ static void DiffuseMaterials() {
         }
     }    
 
-    PPM.WritePPM(pixels, "diffuse-materials.ppm", samplesPerPixel);    
+    //PPM.WritePPM(pixels, "diffuse-materials-gamma.ppm", samplesPerPixel);    
+    PPM.WritePPM(pixels, "diffuse-materials-gamma-correct.ppm", samplesPerPixel, true);    
 }
 
 
