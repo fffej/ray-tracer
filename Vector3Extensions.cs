@@ -21,4 +21,8 @@ public static class Vector3Extensions {
             return p;
         }
     }
+
+    public static Vector3 RandomUnitVector() {
+        return Vector3.Normalize(RandomUnitSphere());
+    }
 }

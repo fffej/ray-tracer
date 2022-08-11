@@ -296,7 +296,7 @@ static void DiffuseMaterials() {
         HitRecord rec = new();
         // Get rid of the shadow acne problem
         if (world.Hit(r,0.0001f, float.MaxValue, ref rec)) { 
-            Vector3 target = rec.P + rec.Normal + Vector3Extensions.RandomUnitSphere();
+            Vector3 target = rec.P + rec.Normal + Vector3Extensions.RandomUnitVector();
 
             var ray = new Ray(rec.P, target - rec.P);
 
