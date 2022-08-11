@@ -25,4 +25,12 @@ public static class Vector3Extensions {
     public static Vector3 RandomUnitVector() {
         return Vector3.Normalize(RandomUnitSphere());
     }
+
+    public static Vector3 RandomInHemisphere(Vector3 normal) {
+        var inUnitSphere = RandomUnitSphere();
+        if (Vector3.Dot(inUnitSphere, normal) > 0f) 
+            return inUnitSphere;
+
+        return -inUnitSphere;
+    }
 }
