@@ -457,7 +457,7 @@ static void GlassSphereThatAlwaysRefracts() {
     world.Add(new Sphere(new Vector3(-1.0f, 0.0f, -1.0f), -0.4f, materialLeft));  
 
     // Position the camera
-    Camera camera = new ();
+    Camera camera = new Camera(new Vector3(-2f,2f,1), new Vector3(0f,0f,-1f), new Vector3(0f,1f,0f), 20, aspectRatio);
     Random rnd = new ();
 
     // Do the render
