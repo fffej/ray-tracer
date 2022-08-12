@@ -60,9 +60,17 @@ public class Dielectric : Material {
         var refRatio = rec.FrontFace ? 1.0f / refIdx : refIdx;
 
         var unitDirection = Vector3.Normalize(rIn.Direction);
-        var refracted = Vector3Extensions.Refract(unitDirection, rec.Normal, refRatio);
+        
+        var cosTheta = Math.Min(Vector3.Dot(-unitDirection, rec.Normal), 1.0f);
+        var sinTheta = (float)Math.Sqrt(1.0f - cosTheta * cosTheta);
 
-        scattered = new Ray(rec.P, refracted);
+        var cannotRefract = refRatio * sinTheta > 1;
+
+        Vector3 direction = cannotRefract ? 
+            Vector3Extensions.Reflect(unitDirection, rec.Normal) : 
+            Vector3Extensions.Refract(unitDirection, rec.Normal, refRatio);
+
+        scattered = new Ray(rec.P, direction);
 
         return true;
     }
