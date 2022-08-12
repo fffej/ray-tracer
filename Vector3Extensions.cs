@@ -43,4 +43,12 @@ public static class Vector3Extensions {
     public static Vector3 Reflect(Vector3 v, Vector3 n) {
         return v - 2 * Vector3.Dot(v, n) * n;
     }
+
+// TODO
+    public static Vector3 Refract(Vector3 v, Vector3 n, float etaiOverEtat) {
+        var cosTheta = Math.Min(Vector3.Dot(-v, n), 1f);
+        var outPerp = etaiOverEtat * (v + cosTheta * n);
+        var outParallel = -(float)Math.Sqrt(1f - outPerp.LengthSquared()) * n;
+        return outPerp + outParallel;
+    }
 }

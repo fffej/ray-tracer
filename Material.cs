@@ -49,3 +49,21 @@ public class Metal : Material {
         return Vector3.Dot(scattered.Direction, rec.Normal) > 0;
     }
 }
+
+public class Dielectric : Material {
+    private float refIdx;
+    public Dielectric(float refIdx) {
+        this.refIdx = refIdx;
+    }
+    public bool Scatter(Ray rIn, HitRecord rec, out Vector3 attenuation, out Ray scattered) {
+        attenuation = new Vector3(1.0f, 1.0f, 1.0f);
+        var refRatio = rec.FrontFace ? 1.0f / refIdx : refIdx;
+
+        var unitDirection = Vector3.Normalize(rIn.Direction);
+        var refracted = Vector3Extensions.Refract(unitDirection, rec.Normal, refRatio);
+
+        scattered = new Ray(rec.P, refracted);
+
+        return true;
+    }
+}
