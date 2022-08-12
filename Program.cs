@@ -188,8 +188,7 @@ static void ColoredSphere() {
 static void HittableWorld() {
 
     static Vector3 RayColor(Ray r, Hittable world) {
-        HitRecord rec = new();
-        if (world.Hit(r,0, float.MaxValue, ref rec)) {
+        if (world.Hit(r,0, float.MaxValue, out var rec)) {
             return 0.5f * (rec.Normal + new Vector3(1.0f, 1.0f, 1.0f));
         }
 
@@ -239,8 +238,7 @@ static void HittableWorld() {
 static void HittableWorldWithAntiAliasing() {
 
     static Vector3 RayColor(Ray r, Hittable world) {
-        HitRecord rec = new();
-        if (world.Hit(r,0, float.MaxValue, ref rec)) {
+        if (world.Hit(r,0, float.MaxValue, out var rec)) {
             return 0.5f * (rec.Normal + new Vector3(1.0f, 1.0f, 1.0f));
         }
 
@@ -293,9 +291,8 @@ static void DiffuseMaterials() {
         if (depth <= 0) 
             return new Vector3(0,0,0f);
 
-        HitRecord rec = new();
         // Get rid of the shadow acne problem
-        if (world.Hit(r,0.0001f, float.MaxValue, ref rec)) { 
+        if (world.Hit(r,0.0001f, float.MaxValue, out var rec)) { 
             Vector3 target = rec.P + Vector3Extensions.RandomInHemisphere(rec.Normal);
 
             var ray = new Ray(rec.P, target - rec.P);
@@ -354,9 +351,8 @@ static void MetalMaterials() {
         if (depth <= 0) 
             return new Vector3(0,0,0f);
 
-        HitRecord rec = new();
         // Get rid of the shadow acne problem
-        if (world.Hit(r,0.0001f, float.MaxValue, ref rec)) { 
+        if (world.Hit(r,0.0001f, float.MaxValue, out var rec)) { 
 
             if (rec.Material.Scatter(r, rec, out var attenuation, out var scattered)) {
                 return attenuation * RayColor(scattered, world, depth-1);
@@ -424,9 +420,8 @@ static void GlassSphereThatAlwaysRefracts() {
         if (depth <= 0) 
             return new Vector3(0,0,0f);
 
-        HitRecord rec = new();
         // Get rid of the shadow acne problem
-        if (world.Hit(r,0.0001f, float.MaxValue, ref rec)) { 
+        if (world.Hit(r,0.0001f, float.MaxValue, out var rec)) { 
 
             if (rec.Material.Scatter(r, rec, out var attenuation, out var scattered)) {
                 return attenuation * RayColor(scattered, world, depth-1);

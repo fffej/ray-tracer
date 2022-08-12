@@ -19,7 +19,7 @@ public record HitRecord(Vector3 p = new Vector3(), Vector3 normal = new Vector3(
 }
 
 public interface Hittable {
-    public bool Hit(Ray r, float tMin, float tMax, ref HitRecord rec);
+    public bool Hit(Ray r, float tMin, float tMax, out HitRecord rec);
 }
 
 public class HittableComposite : Hittable {
@@ -30,14 +30,15 @@ public class HittableComposite : Hittable {
         objects.Add(h);
     }
 
-    public bool Hit(Ray r, float tMin, float tMax, ref HitRecord rec) {
-        var tempRec = new HitRecord();
+    public bool Hit(Ray r, float tMin, float tMax, out HitRecord rec) {
         var hitAnything = false;
         var closestSoFar = tMax;
 
+        rec = new HitRecord();
+
 // TODO: This is really a fold
         foreach(var o in objects)  {
-            if (o.Hit(r, tMin, closestSoFar, ref tempRec)) {
+            if (o.Hit(r, tMin, closestSoFar, out var tempRec)) {
                 hitAnything = true;
                 closestSoFar = tempRec.T;
                 rec = tempRec;
@@ -56,8 +57,6 @@ public class Sphere : Hittable {
 
     private Material material;
 
-
-
     public Sphere(Vector3 center, float radius) : this(center, radius, NullMaterial.Value){
     }
 
@@ -67,7 +66,7 @@ public class Sphere : Hittable {
         this.material = material;
     }
 
-     public bool Hit(Ray r, float tMin, float tMax, ref HitRecord rec) {
+     public bool Hit(Ray r, float tMin, float tMax, out HitRecord rec) {
         var oc = r.Origin - center;
         var a = r.Direction.LengthSquared();
         var halfB = Vector3.Dot(oc, r.Direction);
@@ -75,6 +74,7 @@ public class Sphere : Hittable {
         
         var discriminant = halfB * halfB - a * c;
         if (discriminant < 0) {
+            rec = new HitRecord();
             return false;
         }
 
@@ -84,10 +84,12 @@ public class Sphere : Hittable {
         if (root < tMin || tMax < root) {
             root = (-halfB + sqrtD) / a;
             if (root < tMin || tMax < root) {
+                rec = new HitRecord();
                 return false;
             }
         }
 
+        rec = new HitRecord();
         rec.T = root;
         rec.P = r.At(rec.T);
         var outwardNormal = (rec.P - center) / radius;
