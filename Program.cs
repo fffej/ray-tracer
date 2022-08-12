@@ -453,7 +453,8 @@ static void GlassSphereThatAlwaysRefracts() {
     world.Add(new Sphere(new Vector3(0.0f,-100.5f, -1.0f), 100.0f, materialGround));
     world.Add(new Sphere(new Vector3(0.0f, 0.0f, -1.0f), 0.5f, materialCenter));
     world.Add(new Sphere(new Vector3(-1.0f, 0.0f, -1.0f), 0.5f, materialLeft));
-    world.Add(new Sphere(new Vector3(1.0f, 0.0f, -1.0f), 0.5f, materialRight));    
+    world.Add(new Sphere(new Vector3(1.0f, 0.0f, -1.0f), 0.5f, materialRight));
+    world.Add(new Sphere(new Vector3(-1.0f, 0.0f, -1.0f), -0.4f, materialLeft));  
 
     // Position the camera
     Camera camera = new ();
@@ -480,7 +481,8 @@ static void GlassSphereThatAlwaysRefracts() {
 
     //PPM.WritePPM(pixels, "diffuse-materials-gamma.ppm", samplesPerPixel);    
     //PPM.WritePPM(pixels, "glass-sphere-that-always-refracts.ppm", samplesPerPixel, true);    
-    PPM.WritePPM(pixels, "glass-sphere-that-sometimes-refracts.ppm", samplesPerPixel, true);    
+    //PPM.WritePPM(pixels, "glass-sphere-that-sometimes-refracts.ppm", samplesPerPixel, true);    
+    PPM.WritePPM(pixels, "a-hollow-glass-sphere.ppm", samplesPerPixel, true);    
 }
 
 WriteTestImage();

@@ -52,6 +52,8 @@ public class Metal : Material {
 
 public class Dielectric : Material {
     private float refIdx;
+
+    private Random rnd = new Random();
     public Dielectric(float refIdx) {
         this.refIdx = refIdx;
     }
@@ -66,7 +68,7 @@ public class Dielectric : Material {
 
         var cannotRefract = refRatio * sinTheta > 1;
 
-        Vector3 direction = cannotRefract ? 
+        Vector3 direction = (cannotRefract || Reflectance(cosTheta, refRatio) > rnd.NextSingle()) ? 
             Vector3Extensions.Reflect(unitDirection, rec.Normal) : 
             Vector3Extensions.Refract(unitDirection, rec.Normal, refRatio);
 
@@ -74,4 +76,10 @@ public class Dielectric : Material {
 
         return true;
     }
+
+    private float Reflectance(float cosTheta, float refRatio) {
+        var r0 = (1 - refRatio) / (1 + refRatio);
+        r0 = r0 * r0;
+        return r0 + (1 - r0) * (float)Math.Pow((1 - cosTheta), 5);
+    }    
 }
