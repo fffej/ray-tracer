@@ -7,6 +7,8 @@ public record HitRecord(Vector3 p = new Vector3(), Vector3 normal = new Vector3(
     public float T { get; set; }
     public bool FrontFace { get; set; }
 
+    public Material Material { get; set; }
+
     public void SetFaceNormal(Ray r, Vector3 outwardNormal) {
         this.Normal = outwardNormal;
         this.FrontFace = Vector3.Dot(r.Direction, outwardNormal) < 0;
@@ -52,9 +54,17 @@ public class Sphere : Hittable {
 
     private Vector3 center;
 
-    public Sphere(Vector3 center, float radius) {
+    private Material material;
+
+
+
+    public Sphere(Vector3 center, float radius) : this(center, radius, NullMaterial.Value){
+    }
+
+    public Sphere(Vector3 center, float radius, Material material) {
         this.center = center;
         this.radius = radius;
+        this.material = material;
     }
 
      public bool Hit(Ray r, float tMin, float tMax, ref HitRecord rec) {
@@ -82,6 +92,7 @@ public class Sphere : Hittable {
         rec.P = r.At(rec.T);
         var outwardNormal = (rec.P - center) / radius;
         rec.SetFaceNormal(r, outwardNormal);
+        rec.Material = material;
 
         return true;
      }

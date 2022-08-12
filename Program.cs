@@ -347,6 +347,75 @@ static void DiffuseMaterials() {
     PPM.WritePPM(pixels, "diffuse-materials-gamma-correct.ppm", samplesPerPixel, true);    
 }
 
+static void MetalMaterials() {
+
+    static Vector3 RayColor(Ray r, Hittable world, int depth) {
+
+        if (depth <= 0) 
+            return new Vector3(0,0,0f);
+
+        HitRecord rec = new();
+        // Get rid of the shadow acne problem
+        if (world.Hit(r,0.0001f, float.MaxValue, ref rec)) { 
+
+            if (rec.Material.Scatter(r, rec, out var attenuation, out var scattered)) {
+                return attenuation * RayColor(scattered, world, depth-1);
+            }
+            
+            return new Vector3(0,0,0f);
+        }
+
+        var unitDirection = Vector3.Normalize(r.Direction);
+        var t = 0.5f * (unitDirection.Y + 1.0f);
+        return (1.0f - t) * new Vector3(1.0f, 1.0f, 1.0f) + t * new Vector3(0.5f, 0.7f, 1.0f);
+    }
+
+    // Create an image
+    var aspectRatio = 16.0f/9.0f;
+    var imageWidth = 400;
+    var imageHeight = (int)(imageWidth / aspectRatio);
+    var samplesPerPixel = 100;
+    var maxDepth = 50;
+
+    // Create a world
+    var world = new HittableComposite();
+    
+    var materialGround = new Lambertian(new Vector3(0.8f, 0.8f, 0.0f));
+    var materialCenter = new Lambertian(new Vector3(0.7f, 0.3f, 0.3f));
+    var materialLeft = new Metal(new Vector3(0.8f, 0.8f, 0.8f), 0.3f);
+    var materialRight = new Metal(new Vector3(0.8f, 0.6f, 0.2f), 1.0f);
+
+    world.Add(new Sphere(new Vector3(0.0f,-100.5f, -1.0f), 100.0f, materialGround));
+    world.Add(new Sphere(new Vector3(0.0f, 0.0f, -1.0f), 0.5f, materialCenter));
+    world.Add(new Sphere(new Vector3(-1.0f, 0.0f, -1.0f), 0.5f, materialLeft));
+    world.Add(new Sphere(new Vector3(1.0f, 0.0f, -1.0f), 0.5f, materialRight));    
+
+    // Position the camera
+    Camera camera = new ();
+    Random rnd = new ();
+
+    // Do the render
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
+
+    for (int j = imageHeight-1; j >= 0; --j) {
+        for (int i = 0; i < imageWidth; ++i) {
+
+            var pixelColor = new Vector3(0.0f, 0.0f, 0.0f);
+            for (int s=0;s<samplesPerPixel;++s) {
+                var u = (float)(i + rnd.NextSingle()) / (imageWidth-1);
+                var v = (float)(j  + rnd.NextSingle()) / (imageHeight-1);
+
+                var r = camera.GetRay(u, v);
+                pixelColor += RayColor(r, world, maxDepth);
+
+            }
+            pixels[i][j] = ToArray(pixelColor);
+        }
+    }    
+
+    //PPM.WritePPM(pixels, "diffuse-materials-gamma.ppm", samplesPerPixel);    
+    PPM.WritePPM(pixels, "fuzzed-metal.ppm", samplesPerPixel, true);    
+}
 
 
 WriteTestImage();
@@ -356,3 +425,4 @@ ColoredSphere();
 HittableWorld();
 HittableWorldWithAntiAliasing();
 DiffuseMaterials();
+MetalMaterials();
