@@ -485,7 +485,98 @@ static void GlassSphereThatAlwaysRefracts() {
     PPM.WritePPM(pixels, "a-hollow-glass-sphere.ppm", samplesPerPixel, true);    
 }
 
-WriteTestImage();
+void RandomScene() {
+
+    static Vector3 RayColor(Ray r, Hittable world, int depth) {
+
+        if (depth <= 0) 
+            return new Vector3(0,0,0f);
+
+        // Get rid of the shadow acne problem
+        if (world.Hit(r,0.0001f, float.MaxValue, out var rec)) { 
+
+            if (rec.Material.Scatter(r, rec, out var attenuation, out var scattered)) {
+                return attenuation * RayColor(scattered, world, depth-1);
+            }
+            
+            return new Vector3(0,0,0f);
+        }
+
+        var unitDirection = Vector3.Normalize(r.Direction);
+        var t = 0.5f * (unitDirection.Y + 1.0f);
+        return (1.0f - t) * new Vector3(1.0f, 1.0f, 1.0f) + t * new Vector3(0.5f, 0.7f, 1.0f);
+    }
+
+    var rnd = new Random();
+    var world = new HittableComposite();
+    
+    var groundMaterial = new Lambertian(new Vector3(0.5f, 0.5f, 0.5f));
+    world.Add(new Sphere(new Vector3(0f,-1000f,0f),1000, groundMaterial));
+
+    for (int a=-11;a<11;a++) {
+        for (int b=-11;b<11;b++) {
+            var material = rnd.NextSingle();
+            var center = new Vector3(a+0.9f*rnd.NextSingle(),0.2f,b+0.9f*rnd.NextSingle());
+
+            var p3 = new Vector3(4f,0.2f,0f);
+            if ((center-p3).Length() > 0.9f) {
+                if (material < 0.8f) {
+                    world.Add(new Sphere(center,0.2f, new Lambertian(Vector3Extensions.RandomUnitVector())));
+                } else if (material < 0.95f) {
+                    world.Add(new Sphere(center,0.2f, new Metal(Vector3Extensions.RandomUnitVector(),0.5f*(1f+rnd.NextSingle()))));
+                } else {
+                    world.Add(new Sphere(center,0.2f, new Dielectric(1.5f)));
+                }
+            }
+        }
+    }
+
+    var material1 = new Lambertian(new Vector3(0.7f, 0.3f, 0.1f));
+    world.Add(new Sphere(new Vector3(0f,1f,0f),1f, material1));
+
+    var material2 = new Lambertian(new Vector3(0.2f, 0.3f, 0.1f));
+    world.Add(new Sphere(new Vector3(-4f,1f,0f),1f, material2));
+
+    var material3 = new Metal(new Vector3(0.7f, 0.6f, 0.5f),0.0f);
+    world.Add(new Sphere(new Vector3(4f,1f,0f),1f, material3));
+
+ // Position the camera
+    var aspectRatio = 3f/2f;
+    var imageWidth = 600;
+    var imageHeight = (int)(imageWidth / aspectRatio);    
+    var samplesPerPixel = 50;
+    var maxDepth = 50;
+
+    var lookFrom = new Vector3(13f,2f,3f);
+    var lookAt = new Vector3(0f,0f,0f);
+    var vup = new Vector3(0f,1f,0f);
+    
+    var cam = new Camera(lookFrom, lookAt, vup, 20, aspectRatio);
+
+    var pixels = CreateBlankImage(imageWidth, imageHeight);
+
+    for (int j = imageHeight-1; j >= 0; --j) {
+        for (int i = 0; i < imageWidth; ++i) {
+
+            var pixelColor = new Vector3(0.0f, 0.0f, 0.0f);
+            for (int s=0;s<samplesPerPixel;++s) {
+                var u = (float)(i + rnd.NextSingle()) / (imageWidth-1);
+                var v = (float)(j  + rnd.NextSingle()) / (imageHeight-1);
+
+                var r = cam.GetRay(u, v);
+                pixelColor += RayColor(r, world, maxDepth);
+
+            }
+            pixels[i][j] = ToArray(pixelColor);
+        }
+    }    
+
+    PPM.WritePPM(pixels, "random-scene.ppm", samplesPerPixel);
+}
+
+
+
+/*WriteTestImage();
 BlueToWhite();
 ASimpleRedSphere();
 ColoredSphere();
@@ -493,4 +584,5 @@ HittableWorld();
 HittableWorldWithAntiAliasing();
 DiffuseMaterials();
 MetalMaterials();
-GlassSphereThatAlwaysRefracts();
+GlassSphereThatAlwaysRefracts();*/
+RandomScene();
